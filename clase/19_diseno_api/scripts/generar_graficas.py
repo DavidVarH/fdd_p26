@@ -113,14 +113,57 @@ def gen_canary_rollout():
     for spine in ax2.spines.values():
         spine.set_edgecolor(GRID_CLR)
 
-    ax1.plot(traffic, traffic, color=ACCENT2, linewidth=2.5, marker="o")
-    ax2.plot(traffic, error_new, color=ACCENT3, linewidth=2.5, marker="s")
+    line1 = ax1.plot(
+        traffic,
+        traffic,
+        color=ACCENT2,
+        linewidth=2.5,
+        marker="o",
+        label="Trafico enviado a v2 (%)",
+    )[0]
+    line2 = ax2.plot(
+        traffic,
+        error_new,
+        color=ACCENT3,
+        linewidth=2.5,
+        marker="s",
+        label="Error rate observado en v2 (%)",
+    )[0]
 
     ax1.set_xlabel("Porcentaje de trafico hacia v2")
     ax1.set_ylabel("Trafico canary (%)")
     ax2.set_ylabel("Error rate de v2 (%)")
     ax1.set_title("Canary rollout y salud de la nueva version", fontsize=14, fontweight="bold")
     ax1.grid(color=GRID_CLR, linestyle="--", linewidth=0.5, alpha=0.5)
+
+    legend = ax1.legend(
+        [line1, line2],
+        [line1.get_label(), line2.get_label()],
+        loc="upper left",
+        fontsize=9,
+        facecolor=BG,
+        edgecolor=GRID_CLR,
+        labelcolor=FG,
+    )
+    for text in legend.get_texts():
+        text.set_color(FG)
+
+    ax1.annotate(
+        "Mas trafico a v2",
+        xy=(50, 50),
+        xytext=(18, 68),
+        color=FG,
+        fontsize=9,
+        arrowprops=dict(arrowstyle="->", color=ACCENT2, lw=1.2),
+    )
+    ax2.annotate(
+        "Si esta linea sube demasiado,\nse frena el rollout",
+        xy=(50, 1.2),
+        xytext=(62, 0.88),
+        color=FG,
+        fontsize=9,
+        arrowprops=dict(arrowstyle="->", color=ACCENT3, lw=1.2),
+    )
     plt.tight_layout()
     save(fig, "canary_rollout.png")
 
@@ -142,8 +185,48 @@ def gen_latency_error_budget():
     for spine in ax2.spines.values():
         spine.set_edgecolor(GRID_CLR)
 
-    ax1.bar(x - width / 2, latency, width, color=ACCENT2, label="p95 ms", edgecolor=BG, linewidth=1.1)
-    ax2.bar(x + width / 2, error, width, color=ACCENT3, label="error %", edgecolor=BG, linewidth=1.1)
+    bars1 = ax1.bar(
+        x - width / 2,
+        latency,
+        width,
+        color=ACCENT2,
+        label="Barra azul: latencia p95 (ms)",
+        edgecolor=BG,
+        linewidth=1.1,
+    )
+    bars2 = ax2.bar(
+        x + width / 2,
+        error,
+        width,
+        color=ACCENT3,
+        label="Barra roja: error rate (%)",
+        edgecolor=BG,
+        linewidth=1.1,
+    )
+
+    for bar, val in zip(bars1, latency):
+        ax1.text(
+            bar.get_x() + bar.get_width() / 2,
+            bar.get_height() + 8,
+            f"{val} ms",
+            ha="center",
+            va="bottom",
+            color=FG,
+            fontsize=9,
+            fontweight="bold",
+        )
+
+    for bar, val in zip(bars2, error):
+        ax2.text(
+            bar.get_x() + bar.get_width() / 2,
+            bar.get_height() + 0.05,
+            f"{val:.1f}%",
+            ha="center",
+            va="bottom",
+            color=FG,
+            fontsize=9,
+            fontweight="bold",
+        )
 
     ax1.set_xticks(x)
     ax1.set_xticklabels(labels)
@@ -151,6 +234,27 @@ def gen_latency_error_budget():
     ax2.set_ylabel("Error rate (%)")
     ax1.set_title("Latencia y error budget durante el rollout", fontsize=14, fontweight="bold")
     ax1.grid(color=GRID_CLR, linestyle="--", linewidth=0.5, alpha=0.5, axis="y")
+
+    legend = ax1.legend(
+        [bars1, bars2],
+        ["Barra azul: latencia p95 (ms)", "Barra roja: error rate (%)"],
+        loc="upper left",
+        fontsize=9,
+        facecolor=BG,
+        edgecolor=GRID_CLR,
+        labelcolor=FG,
+    )
+    for text in legend.get_texts():
+        text.set_color(FG)
+
+    ax2.annotate(
+        "Aqui el rollout se ve riesgoso:\nsuben latencia y errores",
+        xy=(2 + width / 2, 1.8),
+        xytext=(2.45, 1.45),
+        color=FG,
+        fontsize=9,
+        arrowprops=dict(arrowstyle="->", color=ACCENT3, lw=1.2),
+    )
     plt.tight_layout()
     save(fig, "latency_error_budget.png")
 

@@ -108,6 +108,20 @@ En la sección 19 la pregunta es:
 
 > “Ya elegiste una flecha. ¿Cómo haces para que siga funcionando dentro de seis meses, con más clientes, más tráfico y más cambios?”
 
+## Nota breve de vocabulario
+
+En arquitectura de plataformas a veces verás estos términos:
+
+- **ingress**: tráfico que **entra** a tu sistema desde afuera
+- **egress**: tráfico que **sale** de tu sistema hacia otro servicio externo
+
+En este módulo no serán protagonistas, pero sí vale la pena reconocerlos:
+
+- el tráfico que entra al chatbot por el gateway es un caso de **ingress**
+- cuando el backend del chatbot llama a la API del LLM, eso puede pensarse como **egress**
+
+La idea importante aquí no es memorizar más jerga, sino notar que las flechas de una arquitectura también se nombran según **hacia dónde cruza el tráfico**.
+
 ## Prerrequisitos
 
 - Haber completado `18_intro_a_apis`
