@@ -95,11 +95,21 @@ Lectura: no todos los cambios cuestan lo mismo; una API madura intenta empujar l
 
 ![Canary rollout](./images/canary_rollout.png)
 
-Lectura: un rollout sano no mira solo "cuánto tráfico ya pasé", sino si la nueva versión sigue estable mientras ese porcentaje crece.
+Lectura:
+
+- la línea **azul** muestra qué porcentaje del tráfico ya estás mandando a `v2`
+- la línea **roja** muestra qué tan mal o qué tan bien se está comportando `v2` mientras recibe ese tráfico
+
+La idea del canary es esta: no basta con subir la línea azul. También tienes que vigilar la roja. Si aumentas tráfico hacia `v2` y el error rate de `v2` sube demasiado, la lectura correcta no es "vamos bien porque ya pasamos mucho tráfico", sino "hay que frenar o revertir".
 
 ![Latencia y error budget](./images/latency_error_budget.png)
 
-Lectura: si la latencia y la tasa de error empiezan a consumir demasiado error budget, el mensaje no es "espera a ver si mejora", sino "detén o revierte".
+Lectura:
+
+- la barra **azul** muestra la latencia `p95`, es decir, qué tan lenta se está volviendo la API para una parte importante de las requests
+- la barra **roja** muestra la tasa de error observada en cada etapa del rollout
+
+La figura intenta mostrar que no basta con decir "la nueva versión ya está en producción". Lo importante es mirar si, al aumentar tráfico hacia `v2`, también aumentan demasiado la latencia y los errores. En este ejemplo, `v2 50%` es la señal de alerta: ambas barras suben al mismo tiempo, así que el rollout deja de verse sano y conviene frenarlo o revertirlo.
 
 ---
 

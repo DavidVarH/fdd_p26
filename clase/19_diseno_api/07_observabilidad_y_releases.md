@@ -111,12 +111,36 @@ No compiten. Se complementan.
 
 Si una request entra por gateway, pasa por backend y toca otros servicios, necesitas correlación.
 
+La idea es simple: necesitas una forma de reconocer que **todos esos eventos pertenecen a la misma petición original**.
+
 ```
 request_id = req_abc123
 trace_id   = tr_987
 ```
 
-Sin eso, un incidente se vuelve arqueología.
+### ¿Qué suele significar cada uno?
+
+- `request_id`: identificador único de una petición HTTP concreta
+- `trace_id`: identificador compartido por todo el recorrido de esa petición a través de varios servicios
+
+En sistemas pequeños a veces basta con uno solo. En sistemas distribuidos, el `trace_id` ayuda a seguir la misma operación cuando salta entre gateway, backend, base de datos y servicios internos.
+
+Ejemplo:
+
+```text
+Usuario
+  -> Gateway        log: request_id=req_abc123 trace_id=tr_987
+  -> Chatbot API    log: request_id=req_abc123 trace_id=tr_987
+  -> Model service  log: request_id=req_abc123 trace_id=tr_987
+```
+
+Así, si algo falla, puedes reconstruir el camino completo:
+
+- cuánto tardó en el gateway
+- cuánto tardó en el backend
+- en qué servicio apareció el error
+
+Sin esa correlación, cada log queda aislado y un incidente se vuelve arqueología: tienes muchas pistas sueltas, pero no sabes cuáles pertenecen al mismo problema.
 
 ---
 
